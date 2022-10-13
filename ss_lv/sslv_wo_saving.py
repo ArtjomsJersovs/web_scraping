@@ -1,5 +1,7 @@
 import re
 from bs4 import BeautifulSoup
+from matplotlib.pyplot import text
+from numpy import NaN
 import requests
 import bs4 
 import os 
@@ -31,7 +33,7 @@ for cat in all_cats:
     cat_name = cat.get_text()
     all_cats_dict[cat_name] = cat_link   
 
-#subset_auto_company = {'Volkswagen':'https://www.ss.lv/lv/transport/cars/volkswagen/'}
+subset_auto_company = {'Smart':'https://www.ss.lv/lv/transport/cars/smart/'}
 #iterate over each category
 iteration_count = int(len(all_cats_dict)) - 1
 count = 0
@@ -40,7 +42,7 @@ print(f"Iterations in total across categories: {iteration_count}")
 #create dataframe to store all parsed content
 main_df = pd.DataFrame()
 
-for name, link in all_cats_dict.items():
+for name, link in subset_auto_company.items():
 #limit only first 4 categories (testing purposes)
     if count <= 1:
         
@@ -75,14 +77,28 @@ for name, link in all_cats_dict.items():
             for item in sludinajumi_all:
                 all_content = item.find_all('td')
                 auto_label = name
-                links = 'ss.lv'+item.find('a').get('href')
-                sludinajums = all_content[2].text
+                links = 'http://ss.lv'+item.find('a').get('href')
                 modelis = all_content[3].text
                 gads = all_content[4].text
                 tilpums = all_content[5].text
                 nobraukums = all_content[6].text
                 cena = all_content[7].text
                 sludinajuma_id = item.find(class_='msg2').find('a').get('id')
+#get into particular offer and parse data
+                html_offer = requests.get(links)
+                soup_offer = BeautifulSoup(html_offer.text, "lxml")
+                if len(soup_offer.find(class_='options_list').find_all('tr'))<3:
+                    sludinajums = ''
+                    transmission = ''
+                    color = ''
+                    type = ''
+                    tech_check = ''
+                else:
+                    sludinajums = soup_offer.find('div', id='msg_div_msg').find_all(text=True, recursive=False)[1].strip()
+                    transmission = soup_offer.find(class_='options_list').find('td', string="Ātr.kārba:").next_sibling.text
+                    color = soup_offer.find(class_='options_list').find('td', string="Krāsa:").next_sibling.text
+                    type = soup_offer.find(class_='options_list').find('td', string="Virsbūves tips:").next_sibling.text
+                    tech_check = soup_offer.find(class_='options_list').find('td', string="Tehniskā apskate:").next_sibling.text
 
                 df = df.append(
                     {
@@ -94,10 +110,15 @@ for name, link in all_cats_dict.items():
                         "Tilp.": tilpums,
                         "Nobrauk.": nobraukums,
                         "Cena": cena,
+                        "Transmisija": transmission,
+                        "Krasa": color,
+                        "Virsbuve": type,
+                        "tehniska apskate": tech_check,
                         "uniq_id": sludinajuma_id
                     },
                     ignore_index=True
                 )
+                
 #add collected content for each page html
             main_df.reset_index(drop=True, inplace=True)
             df.reset_index(drop=True, inplace=True)
@@ -105,8 +126,11 @@ for name, link in all_cats_dict.items():
 
 
 #stop when all existing pages are collected
-            if re.sub("[^0-9]", "",cat_soup.find_all(class_='navi')[-1].get('href'))=='':
-                break   
+            try:
+                if re.sub("[^0-9]", "",cat_soup.find_all(class_='navi')[-1].get('href'))=='':
+                    break   
+            except:
+                break
 
 #Iterator for convenience          
         print(f'all pages for {name} are saved!')
@@ -126,3 +150,14 @@ for name, link in all_cats_dict.items():
         sleep(random.randrange(2, 3))
         
 
+
+
+
+# html_offer = requests.get('https://www.ss.lv/msg/lv/transport/cars/smart/fortwo/akpkj.html')
+# soup_offer = BeautifulSoup(html_offer.text, "lxml")
+# sludinajums = soup_offer.find('div', id='msg_div_msg').find_all(text=True, recursive=False)[1].strip()
+# transmission = soup_offer.find(class_='options_list').find_all('tr')[4].text.split(':')[1]
+# color = soup_offer.find(class_='options_list').find_all('tr')[6].text.split(':')[1].strip()
+# type = soup_offer.find(class_='options_list').find_all('tr')[7].text.split(':')[1]
+# tech_check = soup_offer.find(class_='options_list').find_all('tr')[8].text.split(':')[1]
+# soup_offer.find(class_='options_list').find('td', string="Ātr.kārba:").next_sibling.text
