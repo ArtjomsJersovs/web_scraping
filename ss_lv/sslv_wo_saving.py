@@ -16,7 +16,7 @@ html = requests.get('https://www.ss.lv/lv/transport/cars/')
 
 headers = {
     "Accept": "*/*",
-    "User-Agent": "Mozilla/5.0 (iPad; CPU OS 11_0 like Mac OS X) AppleWebKit/604.1.34 (KHTML, like Gecko) Version/11.0 Mobile/15A5341f Safari/604.1"
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36"
 }
 
 #MAIN HTML
@@ -33,7 +33,7 @@ for cat in all_cats:
     cat_name = cat.get_text()
     all_cats_dict[cat_name] = cat_link   
 
-subset_auto_company = {'Smart':'https://www.ss.lv/lv/transport/cars/smart/'}
+subset_auto_company = {'bmw':'https://www.ss.lv/lv/transport/cars/bmw/'}
 #iterate over each category
 iteration_count = int(len(all_cats_dict)) - 1
 count = 0
@@ -87,18 +87,27 @@ for name, link in subset_auto_company.items():
 #get into particular offer and parse data
                 html_offer = requests.get(links)
                 soup_offer = BeautifulSoup(html_offer.text, "lxml")
-                if len(soup_offer.find(class_='options_list').find_all('tr'))<3:
-                    sludinajums = ''
-                    transmission = ''
-                    color = ''
-                    type = ''
-                    tech_check = ''
-                else:
+#handle buy offers
+                try: 
                     sludinajums = soup_offer.find('div', id='msg_div_msg').find_all(text=True, recursive=False)[1].strip()
+                except:
+                    sludinajums = ''
+                try:
                     transmission = soup_offer.find(class_='options_list').find('td', string="Ātr.kārba:").next_sibling.text
+                except:
+                    transmission = ''
+                try:
                     color = soup_offer.find(class_='options_list').find('td', string="Krāsa:").next_sibling.text
+                except:
+                    color = ''
+                try:
                     type = soup_offer.find(class_='options_list').find('td', string="Virsbūves tips:").next_sibling.text
+                except:
+                    type = ''
+                try:
                     tech_check = soup_offer.find(class_='options_list').find('td', string="Tehniskā apskate:").next_sibling.text
+                except:
+                    tech_check = ''
 
                 df = df.append(
                     {
@@ -118,6 +127,7 @@ for name, link in subset_auto_company.items():
                     },
                     ignore_index=True
                 )
+                sleep(random.randrange(1, 2))
                 
 #add collected content for each page html
             main_df.reset_index(drop=True, inplace=True)
