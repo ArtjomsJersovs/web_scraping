@@ -172,13 +172,3 @@ for name, link in subset_auto_company.items():  #all_cats_dict.items()
 
 
 
-
-html_offer = requests.get('https://www.ss.lv/msg/lv/transport/cars/smart/fortwo/akpkj.html')
-soup_offer = BeautifulSoup(html_offer.text, "lxml")
-sludinajums = soup_offer.find('div', id='msg_div_msg').find_all(text=True, recursive=False)[1].strip()
-transmission = soup_offer.find(class_='options_list').find_all('tr')[4].text.split(':')[1]
-color = soup_offer.find(class_='options_list').find_all('tr')[6].text.split(':')[1].strip()
-type = soup_offer.find(class_='options_list').find_all('tr')[7].text.split(':')[1]
-tech_check = soup_offer.find(class_='options_list').find_all('tr')[8].text.split(':')[1]
-soup_offer.find(class_='options_list').find('td', string="Ātr.kārba:").next_sibling.text
-
