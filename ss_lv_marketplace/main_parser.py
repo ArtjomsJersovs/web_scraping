@@ -19,6 +19,7 @@ headers = {
 
 #MAIN HTML
 sf.save_file('ss.html', html)
+
 with open("ss.html", encoding="utf8") as file:
     src = file.read()
 soup = BeautifulSoup(src, "lxml")
