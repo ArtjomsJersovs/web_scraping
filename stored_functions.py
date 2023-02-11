@@ -2,6 +2,8 @@ import requests
 import pandas as pd
 import json
 import subprocess
+import sqlite3
+from sqlite3 import Error
 
 ### FUNCTIONS
 def clearvars():    
@@ -28,3 +30,49 @@ def save_file(file_name, source):
 def excel_export(df, name='temp_file', size=10000):
     df.head(int(size)).to_excel(str(name) +".xlsx") 
     subprocess.run(["C:/Program Files/Microsoft Office/root/Office16/EXCEL.exe", str(name) +".xlsx"])
+
+
+def create_connection(db_file):
+    """ create a database connection to a SQLite database """
+    conn = sqlite3.connect(db_file)
+    print(sqlite3.version)
+    return conn
+
+def insert_many_records_ss_lv_car_offers(df, db_file):
+    try:
+        record_list = list(df.itertuples(index=False))
+        conn = sqlite3.connect(db_file)
+        cursor = conn.cursor()
+        print("Connected to SQLite")
+
+        sqlite_insert_query = """INSERT INTO ss_lv_car_offers
+                          (auto_label, link, description, model, year, engine_cap, mileage, price, transmission, color, body_type, inspection_valid, publish_date, uniq_offer_id) 
+                          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"""
+
+        cursor.executemany(sqlite_insert_query, record_list)
+        conn.commit()
+        print("Total", cursor.rowcount, "Records inserted successfully into ss_lv_car_offers table")
+        cursor.close()
+    except sqlite3.Error as error:
+        print("Failed to insert multiple records into sqlite table", error)
+    finally:
+        if conn:
+            conn.close()
+            print("The SQLite connection is closed")
+            
+def select_index_from_ss_lv_car_offers(db_file):
+    try:
+        conn = sqlite3.connect(db_file)
+        cursor = conn.cursor()
+        cursor.execute("SELECT uniq_offer_id FROM ss_lv_car_offers")
+        rows = cursor.fetchall()
+        df = pd.DataFrame(rows, columns = ['uniq_offer_id'])
+        cursor.close()
+    except sqlite3.Error as error:
+        print("Failed to fetch sqlite table", error)
+    finally:
+        if conn:
+            conn.close()
+            print("The SQLite connection is closed")
+    return(df)
+
