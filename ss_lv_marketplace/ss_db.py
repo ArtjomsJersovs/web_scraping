@@ -38,7 +38,8 @@ sql_create_offers_table = """ CREATE TABLE IF NOT EXISTS ss_lv_car_offers (
 
 
 
-conn = create_connection(database)
+conn = create_connection(r'C:\Users\Administrator\Documents\web_scraping\ss_lv_marketplace\ss_lv.db')
+
 create_table(conn, sql_create_offers_table)
 
 def insert_many_records(record_list, db_file):

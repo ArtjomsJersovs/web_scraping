@@ -1,4 +1,4 @@
-import re
+﻿import re
 from bs4 import BeautifulSoup
 from matplotlib.pyplot import text
 from numpy import NaN
@@ -14,7 +14,7 @@ import sqlite3
 from sqlite3 import Error
 import schedule
 import telegram_send as ts
-ts_conf=r'C:\Users\artjoms.jersovs\github\Scraping\web_scraping\ss_lv_marketplace\telegram-send.conf'
+ts_conf=r'C:\Users\Administrator\Documents\web_scraping\ss_lv_marketplace\telegram-send.conf'
 
 def insert_many_records_ss_lv_car_offers(df, db_file):
     try:
@@ -74,7 +74,7 @@ def extract_transform():
         "Accept": "*/*",
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36"
     }
-    database = r"C:\Users\artjoms.jersovs\github\Scraping\web_scraping\ss_lv_marketplace\ss_db.db"
+    database = r'C:\Users\Administrator\Documents\web_scraping\ss_lv_marketplace\ss_lv.db'
     html = requests.get('https://www.ss.lv/lv/transport/cars/')
     #sf.save_file('ss.html', html)
 
@@ -92,7 +92,7 @@ def extract_transform():
 
     #subset particular category (temporary)
     subset_cat_dict = dict()
-    keywords = ['Audi','BMW','Ford','Honda','Lexus','Opel','Peugeot','Mercedes','Volkswagen','Skoda', 'Seat','Toyota']
+    keywords =['Audi','BMW','Ford','Honda','Lexus','Opel','Peugeot','Mercedes','Volkswagen','Skoda', 'Seat','Toyota']
 
     for (key, value) in all_cats_dict.items():
     # Check if key is even then add pair to new dictionary
@@ -113,7 +113,7 @@ def extract_transform():
     #Iterate through all categories (or particular category)
     for name, links in subset_cat_dict.items():  #all_cats_dict.items()
     #limit only first x categories (testing purposes)
-        if count <= 2:
+        if count <= 999:
             
     #iterate over all pages and parse content
             seq_nr = 1 #unique urls starts only from page nr.2
@@ -257,7 +257,7 @@ def extract_transform():
 
 def scheduled_script():
     
-    schedule.every().day.at('00:03').do(extract_transform)
+    schedule.every().day.at('22:00').do(extract_transform)
     
     while True:
         schedule.run_pending()
@@ -266,4 +266,4 @@ if __name__ == '__main__':
     print('starting_script')
     scheduled_script()
 
-
+#C:/Users/Administrator/Documents/web_scraping/ss_lv_marketplace/ss_lv.db
